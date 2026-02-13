@@ -1,10 +1,12 @@
-import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+
+import { defineSchema, defineTable } from "convex/server";
 
 export default defineSchema({
   projects: defineTable({
     name: v.string(),
     ownerId: v.string(),
+    updatedAt: v.number(),
     importStatus: v.optional(
       v.union(
         v.literal("completed"),
@@ -12,5 +14,14 @@ export default defineSchema({
         v.literal("failed"),
       ),
     ),
+    exportStatus: v.optional(
+      v.union(
+        v.literal("completed"),
+        v.literal("exporting"),
+        v.literal("failed"),
+        v.literal("cancelled"),
+      ),
+    ),
+    exportRepoUrl: v.optional(v.string()),
   }).index("by_owner", ["ownerId"]),
 });
