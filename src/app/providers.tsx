@@ -20,7 +20,6 @@ const Providers = ({ children }: { children: ReactNode }) => {
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
-          enableSystem
           disableTransitionOnChange
         >
           <Authenticated>
