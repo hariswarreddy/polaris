@@ -1,7 +1,8 @@
-"use client"
+"use client";
 import { AuthLoadingView } from "@/components/features/auth/components/auth-loading-view";
 import { UnauthenticatedView } from "@/components/features/auth/components/unauthorized";
 import { ThemeProvider } from "@/components/theme-provider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { ClerkProvider, useAuth, UserButton } from "@clerk/nextjs";
 import {
   Authenticated,
@@ -22,16 +23,15 @@ const Providers = ({ children }: { children: ReactNode }) => {
           defaultTheme="dark"
           disableTransitionOnChange
         >
-          <Authenticated>
-            <UserButton />
-            {children}
-          </Authenticated>
-          <Unauthenticated>
-            <UnauthenticatedView />
-          </Unauthenticated>
-          <AuthLoading>
-            <AuthLoadingView />
-          </AuthLoading>
+          <TooltipProvider>
+            <Authenticated>{children}</Authenticated>
+            <Unauthenticated>
+              <UnauthenticatedView />
+            </Unauthenticated>
+            <AuthLoading>
+              <AuthLoadingView />
+            </AuthLoading>
+          </TooltipProvider>
         </ThemeProvider>
       </ConvexProviderWithClerk>
     </ClerkProvider>
