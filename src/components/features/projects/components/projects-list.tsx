@@ -12,7 +12,7 @@ import Link from "next/link";
 import { Spinner } from "@/components/ui/spinner";
 import { Kbd } from "@/components/ui/kbd";
 
-import { useProjectsPartial } from "../../hooks/use-projects";
+import { useProjectsPartial } from "../hooks/use-projects";
 import { Doc } from "../../../../../convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 

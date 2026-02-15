@@ -1,21 +1,21 @@
 "use client";
 import { useState } from "react";
 import {
-    ChevronRightIcon,
-    CopyMinusIcon,
-    FilePlusCornerIcon,
-    FolderPlusIcon,
+  ChevronRightIcon,
+  CopyMinusIcon,
+  FilePlusCornerIcon,
+  FolderPlusIcon,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-    useCreateFile,
-    useCreateFolder,
-    useFolderContents,
-} from "@/components/features/hooks/use-files";
-import { useProject } from "@/components/features/hooks/use-projects";
+  useCreateFile,
+  useCreateFolder,
+  useFolderContents,
+} from "@/components/features/projects/hooks/use-files";
+import { useProject } from "@/components/features/projects/hooks/use-projects";
 
 import Tree from "./tree";
 import CreateInput from "./create-input";
@@ -23,7 +23,7 @@ import { LoadingRow } from "./loading-row";
 import { Id } from "../../../../../../convex/_generated/dataModel";
 
 const FileExplorer = ({ projectId }: { projectId: Id<"projects"> }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const [collapseKey, setCollapseKey] = useState(0);
   const [creating, setCreating] = useState<"file" | "folder" | null>(null);
   const project = useProject(projectId);

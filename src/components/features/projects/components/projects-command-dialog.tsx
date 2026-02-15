@@ -10,8 +10,9 @@ import {
   CommandList,
 } from "@/components/ui/command";
 
-import { useProjects } from "../../hooks/use-projects";
+import { useProjects } from "../hooks/use-projects";
 import { getProjectIcon } from "./projects-list";
+import { Doc } from "../../../../../convex/_generated/dataModel";
 
 interface ProjectsCommandDialogProps {
   open: boolean;
@@ -39,7 +40,7 @@ const ProjectsCommandDialog = ({
       <CommandInput placeholder="Search projects..." />
       <CommandList>
         <CommandEmpty>No Projects Found.</CommandEmpty>
-        {projects?.map((project) => (
+        {projects?.map((project: Doc<"projects">) => (
           <CommandItem
             key={project._id}
             value={`${project.name}-${project._id}`}

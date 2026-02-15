@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { Id } from "../../../../../convex/_generated/dataModel";
 import FileExplorer from "./file-explorer";
 import { Allotment } from "allotment";
+import EditorView from "../../editor/components/editor-view";
 
 const MIN_SIDEBAR_WIDTH = 200;
 const MAX_SIDEBAR_WIDTH = 800;
@@ -63,12 +64,17 @@ const ProjectIdView = ({ projectId }: { projectId: Id<"projects"> }) => {
             activeView === "editor" ? "visible" : "invisible",
           )}
         >
-          <Allotment defaultSizes={[DEFAULT_SIDEBAR_WIDTH,DEFAULT_MAIN_SIZE]}>
-            <Allotment.Pane snap minSize={MIN_SIDEBAR_WIDTH} maxSize={MAX_SIDEBAR_WIDTH} preferredSize={DEFAULT_SIDEBAR_WIDTH}>
+          <Allotment defaultSizes={[DEFAULT_SIDEBAR_WIDTH, DEFAULT_MAIN_SIZE]}>
+            <Allotment.Pane
+              snap
+              minSize={MIN_SIDEBAR_WIDTH}
+              maxSize={MAX_SIDEBAR_WIDTH}
+              preferredSize={DEFAULT_SIDEBAR_WIDTH}
+            >
               <FileExplorer projectId={projectId} />
             </Allotment.Pane>
             <Allotment.Pane>
-              Code Here...
+              <EditorView projectId={projectId} />
             </Allotment.Pane>
           </Allotment>
         </div>
