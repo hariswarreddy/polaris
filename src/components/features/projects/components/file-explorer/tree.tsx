@@ -5,12 +5,13 @@ import { FileIcon, FolderIcon } from "@react-symbols/icons/utils";
 
 import { cn } from "@/lib/utils";
 import {
-    useCreateFile,
-    useCreateFolder,
-    useDeleteFile,
-    useFolderContents,
-    useRenameFile,
-} from "@/components/features/hooks/use-files";
+  useCreateFile,
+  useCreateFolder,
+  useDeleteFile,
+  useFolderContents,
+  useRenameFile,
+} from "@/components/features/projects/hooks/use-files";
+import { useEditor } from "@/components/features/editor/hooks/use-editor";
 
 import { getItemPadding } from "./constants";
 import CreateInput from "./create-input";
@@ -40,6 +41,8 @@ const Tree = ({
     parentId: item._id,
     enabled: item.type === "folder" && isOpen,
   });
+
+  const { openFile, closeTab, activeTabId } = useEditor(projectId);
 
   const handleRename = (newName: string) => {
     setIsRenaming(false);
@@ -76,6 +79,7 @@ const Tree = ({
 
   if (item.type === "file") {
     const fileName = item.name;
+    const isActive = activeTabId === item._id;
 
     if (isRenaming) {
       return (
@@ -94,10 +98,12 @@ const Tree = ({
       <TreeItemWrapper
         item={item}
         level={level}
-        onClick={() => setIsOpen(!isOpen)}
+        isActive={isActive}
+        onClick={() => openFile(item._id, { pinned: false })}
+        onDoubleClick={() => openFile(item._id, { pinned: true })}
         onRename={() => setIsRenaming(true)}
-        // onDoubleClick={() => {}}
         onDelete={() => {
+          closeTab(item._id);
           deleteFile({ id: item._id });
         }}
       >
@@ -188,9 +194,8 @@ const Tree = ({
       <TreeItemWrapper
         item={item}
         level={level}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => setIsOpen((value) => !value)}
         onRename={() => setIsRenaming(true)}
-        // onDoubleClick={() => {}}
         onCreateFile={() => startCreating("file")}
         onCreateFolder={() => startCreating("folder")}
         onDelete={() => {

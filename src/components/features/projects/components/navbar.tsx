@@ -24,7 +24,7 @@ import {
   TooltipContent,
 } from "@/components/ui/tooltip";
 
-import { useProject, useRename } from "../../hooks/use-projects";
+import { useProject, useRename } from "../hooks/use-projects";
 import { Id } from "../../../../../convex/_generated/dataModel";
 
 const font = Poppins({
