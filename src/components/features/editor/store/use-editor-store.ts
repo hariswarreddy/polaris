@@ -61,6 +61,8 @@ export const useEditorStore = create<EditorStore>()((set, get) => ({
         openTabs: [...openTabs, fileId],
         activeTabId: fileId,
       });
+      set({ tabs });
+      return;
     }
 
     // Case 3: File already open - just activate (and pin if double-clicked)

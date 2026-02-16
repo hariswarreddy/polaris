@@ -3,7 +3,7 @@ import { AuthLoadingView } from "@/components/features/auth/components/auth-load
 import { UnauthenticatedView } from "@/components/features/auth/components/unauthorized";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { ClerkProvider, useAuth, UserButton } from "@clerk/nextjs";
+import { ClerkProvider, useAuth } from "@clerk/nextjs";
 import {
   Authenticated,
   AuthLoading,
