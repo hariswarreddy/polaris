@@ -55,9 +55,20 @@ export const MessageContent = ({
 }: MessageContentProps) => (
   <div
     className={cn(
-      "is-user:dark flex w-fit min-w-0 max-w-full flex-col gap-2 overflow-hidden text-sm",
-      "group-[.is-user]:ml-auto group-[.is-user]:rounded-lg group-[.is-user]:bg-secondary group-[.is-user]:px-4 group-[.is-user]:py-3 group-[.is-user]:text-foreground",
-      "group-[.is-assistant]:text-foreground",
+      "relative flex w-fit min-w-0 max-w-full flex-col gap-2 overflow-hidden text-sm",
+
+      // USER bubble
+      "group-[.is-user]:ml-auto group-[.is-user]:rounded-2xl group-[.is-user]:rounded-br-sm group-[.is-user]:bg-secondary group-[.is-user]:px-4 group-[.is-user]:py-3 group-[.is-user]:text-foreground",
+
+      // USER tail
+      "group-[.is-user]:before:content-[''] group-[.is-user]:before:absolute group-[.is-user]:before:-right-1 group-[.is-user]:before:top-3 group-[.is-user]:before:h-3 group-[.is-user]:before:w-3 group-[.is-user]:before:rotate-45 group-[.is-user]:before:bg-secondary",
+
+      // ASSISTANT bubble
+      "group-[.is-assistant]:rounded-2xl group-[.is-assistant]:rounded-bl-sm group-[.is-assistant]:text-foreground group-[.is-assistant]:bg-muted group-[.is-assistant]:px-4 group-[.is-assistant]:py-3",
+
+      // ASSISTANT tail
+      "group-[.is-assistant]:before:content-[''] group-[.is-assistant]:before:absolute group-[.is-assistant]:before:-left-1 group-[.is-assistant]:before:top-3 group-[.is-assistant]:before:h-3 group-[.is-assistant]:before:w-3 group-[.is-assistant]:before:rotate-45 group-[.is-assistant]:before:bg-muted",
+
       className
     )}
     {...props}
@@ -65,6 +76,7 @@ export const MessageContent = ({
     {children}
   </div>
 );
+
 
 export type MessageActionsProps = ComponentProps<"div">;
 
