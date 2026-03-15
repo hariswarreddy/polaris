@@ -28,7 +28,7 @@ export const createDeleteFilesTool = ({
         .array(z.string())
         .describe("Array of file or folder IDs to delete"),
     }),
-    handler: async (params, { step: toolStep }) => {
+    handler: async (params, { step }) => {
       const parsed = paramsSchema.safeParse(params);
       if (!parsed.success) {
         return `Error: ${parsed.error.issues[0].message}`;
@@ -61,7 +61,7 @@ export const createDeleteFilesTool = ({
       }
 
       try {
-        return await toolStep?.run("delete-files", async () => {
+        return await step?.run("delete-files", async () => {
           const results: string[] = [];
 
           for (const file of filesToDelete) {

@@ -148,12 +148,10 @@ export const processMessage = inngest.createFunction(
       name: "polaris",
       description: "An expert AI coding assistant",
       system: systemPrompt,
-      model: gemini({
-        // 1. Change to a valid model version
-        model: "gemini-2.5-flash",
-        apiKey: process.env.GOOGLE_API_KEY,
-        // 2. Use v1beta for better tool support and latest features
-        baseUrl: "https://generativelanguage.googleapis.com/v1beta/",
+      model: openai({
+         model: "llama-3.3-70b-versatile",
+          apiKey: process.env.GROQ_API_KEY,
+          baseUrl: "https://api.groq.com/openai/v1",
       }),
       tools: [
         createListFilesTool({ internalKey, projectId }),

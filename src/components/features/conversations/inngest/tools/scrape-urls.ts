@@ -16,7 +16,7 @@ export const createScrapeUrlsTool = () => {
     parameters: z.object({
       urls: z.array(z.string()).describe("Array of URLs to scrape for content"),
     }),
-    handler: async (params, { step: toolStep }) => {
+    handler: async (params, { step }) => {
       const parsed = paramsSchema.safeParse(params);
       if (!parsed.success) {
         return `Error: ${parsed.error.issues[0].message}`;
@@ -24,7 +24,7 @@ export const createScrapeUrlsTool = () => {
 
       const { urls } = parsed.data;
       try {
-        return await toolStep?.run("scrape-urls", async () => {
+        return await step?.run("scrape-urls", async () => {
           const results: { url: string; content: string }[] = [];
           for (const url of urls) {
             try {

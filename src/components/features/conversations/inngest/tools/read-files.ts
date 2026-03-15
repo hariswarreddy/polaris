@@ -22,7 +22,7 @@ export const createReadFilesTool = ({ internalKey }: ReadFilesToolOptions) => {
     parameters: z.object({
       fileIds: z.array(z.string()).describe("Array of file IDs to read"),
     }),
-    handler: async (params, { step: toolStep }) => {
+    handler: async (params, { step }) => {
       const parsed = paramsSchema.safeParse(params);
       if (!parsed.success) {
         return `Error: ${parsed.error.issues[0].message}`;
@@ -30,7 +30,7 @@ export const createReadFilesTool = ({ internalKey }: ReadFilesToolOptions) => {
 
       const { fileIds } = parsed.data;
       try {
-        return await toolStep?.run("read-files", async () => {
+        return await step?.run("read-files", async () => {
           const results: { id: string; name: string; content: string }[] = [];
           for (const fileId of fileIds) {
             const file = await convex.query(api.system.getFileById, {

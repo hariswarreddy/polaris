@@ -23,7 +23,7 @@ export const createUpdateFileTool = ({
       fileId: z.string().describe("The ID of the file to update"),
       content: z.string().describe("The new content for the file"),
     }),
-    handler: async (params, { step: toolStep }) => {
+    handler: async (params, { step }) => {
       const parsed = paramsSchema.safeParse(params);
       if (!parsed.success) {
         return `Error: ${parsed.error.issues[0].message}`;
@@ -45,7 +45,7 @@ export const createUpdateFileTool = ({
         return `Error: "${fileId}" is a folder, not a file. You can only update file contents.`;
       }
       try {
-        return await toolStep?.run("update-file", async () => {
+        return await step?.run("update-file", async () => {
           await convex.mutation(api.system.updateFile, {
             internalKey,
             fileId: fileId as Id<"files">,
