@@ -45,7 +45,7 @@ export const createCreateFilesTool = ({
         )
         .describe("Array of files to create"),
     }),
-    handler: async (params, { step: toolStep }) => {
+    handler: async (params, { step }) => {
       const parsed = paramsSchema.safeParse(params);
       if (!parsed.success) {
         return `Error: ${parsed.error.issues[0].message}`;
@@ -54,7 +54,7 @@ export const createCreateFilesTool = ({
       const { parentId, files } = parsed.data;
 
       try {
-        return await toolStep?.run("create-files", async () => {
+        return await step?.run("create-files", async () => {
           let resolvedParentId: Id<"files"> | undefined;
 
           if (parentId && parentId !== "") {

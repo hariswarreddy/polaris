@@ -66,3 +66,8 @@ export const useCreateProject = () => {
     },
   );
 };
+
+export const useUpdateSettings = () => {
+  // TODO: add optimistic mutation
+  return useMutation(api.projects.updateSettings);
+};

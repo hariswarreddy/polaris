@@ -31,7 +31,7 @@ export const createCreateFolderTool = ({
           "The ID (not name!) of the parent folder from listFiles, or empty string for root level",
         ),
     }),
-    handler: async (params, { step: toolStep }) => {
+    handler: async (params, { step }) => {
       const parsed = paramsSchema.safeParse(params);
       if (!parsed.success) {
         return `Error: ${parsed.error.issues[0].message}`;
@@ -40,7 +40,7 @@ export const createCreateFolderTool = ({
       const { name, parentId } = parsed.data;
 
       try {
-        return await toolStep?.run("create-folder", async () => {
+        return await step?.run("create-folder", async () => {
           // Validate parentId if provided
           if (parentId) {
             try {

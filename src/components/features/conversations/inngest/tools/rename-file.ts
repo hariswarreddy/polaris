@@ -25,7 +25,7 @@ export const createRenameFileTool = ({
       fileId: z.string().describe("The ID of the file or folder to rename"),
       newName: z.string().describe("The new name for the file or folder"),
     }),
-    handler: async (params, { step: toolStep }) => {
+    handler: async (params, { step }) => {
       const parsed = paramsSchema.safeParse(params);
       if (!parsed.success) {
         return `Error: ${parsed.error.issues[0].message}`;
@@ -44,7 +44,7 @@ export const createRenameFileTool = ({
       }
 
       try {
-        return await toolStep?.run("rename-file", async () => {
+        return await step?.run("rename-file", async () => {
           await convex.mutation(api.system.renameFile, {
             internalKey,
             fileId: fileId as Id<"files">,
