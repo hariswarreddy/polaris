@@ -22,6 +22,35 @@ export const getFiles = query({
   },
 });
 
+export const getFilesWithUrls = query({
+  args: {
+    projectId: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await verifyAuth(ctx);
+    const project = await ctx.db.get("projects", args.projectId);
+    if (!project) throw new Error("Project Not Found !!");
+    if (project.ownerId !== identity.subject)
+      throw new Error("You Don't Have Access to this file !!");
+
+    const files = await ctx.db
+      .query("files")
+      .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
+      .order("desc")
+      .collect();
+
+    return await Promise.all(
+      files.map(async (file) => {
+        if (file.storageId) {
+          const storageUrl = await ctx.storage.getUrl(file.storageId);
+          return { ...file, storageUrl };
+        }
+        return { ...file, storageUrl: null };
+      }),
+    );
+  },
+});
+
 export const getFile = query({
   args: {
     id: v.id("files"),
