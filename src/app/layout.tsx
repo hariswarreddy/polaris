@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
-import { IBM_Plex_Mono, Inter } from "next/font/google";
 import "allotment/dist/style.css";
+import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
+import { IBM_Plex_Mono, Inter } from "next/font/google";
 
 import "./globals.css";
 import Providers from "./providers";
@@ -34,6 +35,7 @@ export default function RootLayout({
         <Providers>
           {children}
           <Toaster />
+          <Analytics/>
         </Providers>
       </body>
     </html>
