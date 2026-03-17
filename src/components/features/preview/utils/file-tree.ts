@@ -27,17 +27,20 @@ export const buildFileTree = (files: FileDoc[]): FileSystemTree => {
       const isLast = i === pathParts.length - 1;
       if (isLast) {
         if (file.type === "folder") {
-          current[part] = { directory: {} };
-        } else if (!file.storageId && file.content !== undefined) {
-          current[part] = { file: { contents: file.content } };
-        } else {
           if (!current[part]) {
             current[part] = { directory: {} };
           }
-          const node = current[part];
-          if ("directory" in node) {
-            current = node.directory;
-          }
+        } else if (!file.storageId && file.content !== undefined) {
+          current[part] = { file: { contents: file.content } };
+        }
+      } else {
+        // Create intermediate directory if missing and traverse into it
+        if (!current[part]) {
+          current[part] = { directory: {} };
+        }
+        const node = current[part];
+        if ("directory" in node) {
+          current = node.directory;
         }
       }
     }

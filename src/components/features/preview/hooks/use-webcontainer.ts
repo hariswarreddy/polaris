@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { WebContainer } from "@webcontainer/api";
 
-import { useFiles } from "../../projects/hooks/use-files";
+import { useFilesWithUrls } from "../../projects/hooks/use-files";
 import { Id } from "../../../../../convex/_generated/dataModel";
 import { buildFileTree, getFilePath } from "../utils/file-tree";
 
@@ -55,8 +55,8 @@ export const useWebContainer = ({
   const containerRef = useRef<WebContainer | null>(null);
   const hasStartedRef = useRef(false);
 
-  // Fetch files from Convex (auto-updates on changes)
-  const files = useFiles(projectId);
+  // Fetch files from Convex (auto-updates on changes, with storage URLs for binary files)
+  const files = useFilesWithUrls(projectId);
 
   // Initial boot and mount
   useEffect(() => {
@@ -81,6 +81,26 @@ export const useWebContainer = ({
 
         const fileTree = buildFileTree(files);
         await container.mount(fileTree);
+
+        // Write binary files (images, fonts, etc.) that were skipped by buildFileTree
+        const binaryFiles = files.filter(
+          (f) => f.type === "file" && f.storageId && f.storageUrl,
+        );
+        if (binaryFiles.length > 0) {
+          const filesMap = new Map(files.map((f) => [f._id, f]));
+          await Promise.all(
+            binaryFiles.map(async (file) => {
+              try {
+                const response = await fetch(file.storageUrl!);
+                const arrayBuffer = await response.arrayBuffer();
+                const filePath = getFilePath(file, filesMap);
+                await container.fs.writeFile(filePath, new Uint8Array(arrayBuffer));
+              } catch (err) {
+                console.warn(`Failed to write binary file: ${file.name}`, err);
+              }
+            }),
+          );
+        }
 
         container.on("server-ready", (_port, url) => {
           setPreviewUrl(url);
