@@ -1,23 +1,23 @@
+import { createAgent, createNetwork, openai } from "@inngest/agent-kit";
 import { NonRetriableError } from "inngest";
-import { createAgent, createNetwork, gemini, openai } from "@inngest/agent-kit";
 
 import { convex } from "@/lib/convex-client";
+import { api } from "../../../../../convex/_generated/api";
 import { Id } from "../../../../../convex/_generated/dataModel";
 import { inngest } from "../../../../inngest/client";
-import { api } from "../../../../../convex/_generated/api";
+import { DEFAULT_CONVERSATION_TITLE } from "../constants";
 import {
   CODING_AGENT_SYSTEM_PROMPT,
   TITLE_GENERATOR_SYSTEM_PROMPT,
 } from "./constants";
-import { DEFAULT_CONVERSATION_TITLE } from "../constants";
-import { createListFilesTool } from "./tools/list-files";
-import { createReadFilesTool } from "./tools/read-files";
-import { createUpdateFileTool } from "./tools/update-file";
 import { createCreateFilesTool } from "./tools/create-files";
 import { createCreateFolderTool } from "./tools/create-folder";
-import { createRenameFileTool } from "./tools/rename-file";
 import { createDeleteFilesTool } from "./tools/delete-files";
+import { createListFilesTool } from "./tools/list-files";
+import { createReadFilesTool } from "./tools/read-files";
+import { createRenameFileTool } from "./tools/rename-file";
 import { createScrapeUrlsTool } from "./tools/scrape-urls";
+import { createUpdateFileTool } from "./tools/update-file";
 
 interface MessageEvent {
   messageId: Id<"messages">;
@@ -149,9 +149,9 @@ export const processMessage = inngest.createFunction(
       description: "An expert AI coding assistant",
       system: systemPrompt,
       model: openai({
-         model: "llama-3.3-70b-versatile",
-          apiKey: process.env.GROQ_API_KEY,
-          baseUrl: "https://api.groq.com/openai/v1",
+         model: "nvidia/nemotron-3-super-120b-a12b:free",
+          apiKey: process.env.OPENROUTER_API_KEY,
+          baseUrl: "https://openrouter.ai/api/v1",
       }),
       tools: [
         createListFilesTool({ internalKey, projectId }),

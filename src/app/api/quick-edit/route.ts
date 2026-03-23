@@ -1,7 +1,12 @@
 import { firecrawl } from "@/firecrawl";
 // import { google } from "@ai-sdk/google";
-import { groq } from "@ai-sdk/groq";
+import { createOpenAI } from "@ai-sdk/openai";
 import { auth } from "@clerk/nextjs/server";
+
+const openrouter = createOpenAI({
+  baseURL: "https://openrouter.ai/api/v1",
+  apiKey: process.env.OPENROUTER_API_KEY,
+});
 import { generateText } from "ai";
 import { NextResponse } from "next/server";
 // import z from "zod";
@@ -99,7 +104,7 @@ export async function POST(request: Request) {
       .replace("{documentation}", documentationContext);
 
     const { text } = await generateText({
-      model: groq("llama-3.3-70b-versatile"),
+      model: openrouter("openrouter/free"),
       prompt,
     });
 
