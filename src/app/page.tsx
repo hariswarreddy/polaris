@@ -1,10 +1,11 @@
-import {ProjectsView} from "@/components/features/projects/components/projects-view";
+import { HomePage } from "@/components/features/home/components/home-page";
 
-const HomePage = () => {
+const HomePageRoute = () => {
   return (
-    <ProjectsView />
+    <HomePage />
   )
 }
 
-export default HomePage;
+export default HomePageRoute;
+
 

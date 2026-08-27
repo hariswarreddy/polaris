@@ -29,6 +29,7 @@ interface MessageEvent {
 export const processMessage = inngest.createFunction(
   {
     id: "process-message",
+    triggers: [{ event: "message/sent" }],
     cancelOn: [
       {
         event: "message/cancel",
@@ -51,7 +52,6 @@ export const processMessage = inngest.createFunction(
       }
     },
   },
-  { event: "message/sent" },
   async ({ event, step }) => {
     const { messageId, conversationId, projectId, message } =
       event.data as MessageEvent;
@@ -113,9 +113,9 @@ export const processMessage = inngest.createFunction(
         name: "title-generator",
         system: TITLE_GENERATOR_SYSTEM_PROMPT,
         model: openai({
-          model: "llama-3.1-8b-instant",
-          apiKey: process.env.GROQ_API_KEY,
-          baseUrl: "https://api.groq.com/openai/v1",
+          model: "z-ai/glm-5.3-flash",
+          apiKey: process.env.OPENROUTER_API_KEY,
+          baseUrl: "https://openrouter.ai/api/v1",
         }),
       });
       const { output } = await titleAgent.run(message, { step });
@@ -149,9 +149,9 @@ export const processMessage = inngest.createFunction(
       description: "An expert AI coding assistant",
       system: systemPrompt,
       model: openai({
-         model: "nvidia/nemotron-3-super-120b-a12b:free",
-          apiKey: process.env.OPENROUTER_API_KEY,
-          baseUrl: "https://openrouter.ai/api/v1",
+        model: "z-ai/glm-5.3-flash", // ← changed to Ox Alpha
+        apiKey: process.env.OPENROUTER_API_KEY,
+        baseUrl: "https://openrouter.ai/api/v1", // preferred spelling is baseURL
       }),
       tools: [
         createListFilesTool({ internalKey, projectId }),

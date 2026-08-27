@@ -104,11 +104,11 @@ export async function POST(request: Request) {
       .replace("{documentation}", documentationContext);
 
     const { text } = await generateText({
-      model: openrouter("openrouter/free"),
+      model: openrouter("z-ai/glm-5.3-flash"),
       prompt,
     });
 
-    return NextResponse.json({ editedCode:text });
+    return NextResponse.json({ editedCode: text });
   } catch (error) {
     console.error("Edit error:", error);
     return NextResponse.json(

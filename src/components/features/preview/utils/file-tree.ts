@@ -6,13 +6,13 @@ export const buildFileTree = (files: FileDoc[]): FileSystemTree => {
   const tree: FileSystemTree = {};
   const filesMap = new Map(files.map((f) => [f._id, f]));
   const getPath = (file: FileDoc): string[] => {
-    const parts: string[] = [file.name];
+    const parts: string[] = file.name.split("/").filter(Boolean);
     let parentId = file.parentId;
 
     while (parentId) {
       const parent = filesMap.get(parentId);
       if (!parent) break;
-      parts.unshift(parent.name);
+      parts.unshift(...parent.name.split("/").filter(Boolean));
       parentId = parent.parentId;
     }
 
@@ -53,13 +53,13 @@ export const getFilePath = (
   file: FileDoc,
   filesMap: Map<Id<"files">, FileDoc>,
 ): string => {
-  const parts: string[] = [file.name];
+  const parts: string[] = file.name.split("/").filter(Boolean);
   let parentId = file.parentId;
 
   while (parentId) {
     const parent = filesMap.get(parentId);
     if (!parent) break;
-    parts.unshift(parent.name);
+    parts.unshift(...parent.name.split("/").filter(Boolean));
     parentId = parent.parentId;
   }
 

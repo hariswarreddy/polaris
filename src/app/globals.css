@@ -159,15 +159,14 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html,
+  body {
+    background-color: black;
+    color: white;
+  }
   body {
     @apply bg-background text-foreground;
   }
-}
-
-html,
-body {
-  background-color: black;
-  color: white;
 }
 
 /* ===========================

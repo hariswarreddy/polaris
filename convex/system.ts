@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { Id } from "./_generated/dataModel";
 
 const validateInternalKey = (key: string) => {
   const internalKey = process.env.POLARIS_CONVEX_INTERNAL_KEY;
@@ -263,18 +264,58 @@ export const createFiles = mutation({
   handler: async (ctx, args) => {
     validateInternalKey(args.internalKey);
 
-    const existingFiles = await ctx.db
-      .query("files")
-      .withIndex("by_project_parent", (q) =>
-        q.eq("projectId", args.projectId).eq("parentId", args.parentId),
-      )
-      .collect();
-
     const results: { name: string; fileId: string; error?: string }[] = [];
 
+    // Helper: find or create a folder by name under a given parent
+    const findOrCreateFolder = async (
+      folderName: string,
+      parentId: Id<"files"> | undefined,
+    ): Promise<Id<"files">> => {
+      const siblings = await ctx.db
+        .query("files")
+        .withIndex("by_project_parent", (q) =>
+          q.eq("projectId", args.projectId).eq("parentId", parentId),
+        )
+        .collect();
+
+      const existing = siblings.find(
+        (f) => f.name === folderName && f.type === "folder",
+      );
+
+      if (existing) {
+        return existing._id;
+      }
+
+      return await ctx.db.insert("files", {
+        projectId: args.projectId,
+        name: folderName,
+        type: "folder",
+        parentId,
+        updatedAt: Date.now(),
+      });
+    };
+
     for (const file of args.files) {
-      const existing = existingFiles.find(
-        (f) => f.name === file.name && f.type === "file",
+      // Split path segments (e.g. "public/todo.svg" → ["public", "todo.svg"])
+      const parts = file.name.split("/").filter(Boolean);
+      const fileName = parts.pop()!;
+
+      // Walk/create intermediate directories
+      let currentParent: Id<"files"> | undefined = args.parentId;
+      for (const dirName of parts) {
+        currentParent = await findOrCreateFolder(dirName, currentParent);
+      }
+
+      // Check for existing file at the resolved parent
+      const siblings = await ctx.db
+        .query("files")
+        .withIndex("by_project_parent", (q) =>
+          q.eq("projectId", args.projectId).eq("parentId", currentParent),
+        )
+        .collect();
+
+      const existing = siblings.find(
+        (f) => f.name === fileName && f.type === "file",
       );
 
       if (existing) {
@@ -285,12 +326,13 @@ export const createFiles = mutation({
         });
         continue;
       }
+
       const fileId = await ctx.db.insert("files", {
         projectId: args.projectId,
-        name: file.name,
+        name: fileName,
         content: file.content,
         type: "file",
-        parentId: args.parentId,
+        parentId: currentParent,
         updatedAt: Date.now(),
       });
 
