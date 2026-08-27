@@ -8,6 +8,7 @@ import { useWebContainer } from "../../preview/hooks/use-webcontainer";
 import { Button } from "@/components/ui/button";
 import {
   AlertTriangleIcon,
+  ExternalLinkIcon,
   Loader2Icon,
   RefreshCwIcon,
   TerminalSquareIcon,
@@ -47,9 +48,28 @@ const PreviewView = ({ projectId }: { projectId: Id<"projects"> }) => {
               {status === "booting" ? "Starting..." : "Installing..."}
             </div>
           )}
-          {previewUrl && <span className="truncate">{previewUrl}</span>}
+          {previewUrl && (
+            <a
+              href={previewUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="truncate hover:underline hover:text-foreground transition-colors"
+            >
+              {previewUrl}
+            </a>
+          )}
           {!isLoading && !previewUrl && !error && <span>Ready to preview</span>}
         </div>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-full rounded-none"
+          title="Open in new tab"
+          disabled={!previewUrl}
+          onClick={() => previewUrl && window.open(previewUrl, "_blank")}
+        >
+          <ExternalLinkIcon className="size-3" />
+        </Button>
         <Button
           size="sm"
           variant="ghost"
@@ -93,6 +113,8 @@ const PreviewView = ({ projectId }: { projectId: Id<"projects"> }) => {
                 src={previewUrl}
                 className="size-full border-0"
                 title="Preview"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-presentation"
+                allow="cross-origin-isolated"
               />
             )}
           </Allotment.Pane>

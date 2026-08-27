@@ -1,13 +1,17 @@
 import { generateText } from "ai";
 import { inngest } from "./client";
-import { google } from "@ai-sdk/google";
+import { createOpenAI } from "@ai-sdk/openai";
 import { firecrawl } from "@/firecrawl";
+
+const openrouter = createOpenAI({
+  baseURL: "https://openrouter.ai/api/v1",
+  apiKey: process.env.OPENROUTER_API_KEY,
+});
 
 const URL_REGEX = /https?:\/\/[^\s]+/g;
 
 export const demoGenerate = inngest.createFunction(
-  { id: "demo-generate" },
-  { event: "demo/generate" },
+  { id: "demo-generate", triggers: [{ event: "demo/generate" }] },
   async ({ event, step }) => {
     const { prompt } = event.data as { prompt: string };
     const urls = (await step.run("extract-urls", async () => {
@@ -31,7 +35,7 @@ export const demoGenerate = inngest.createFunction(
       : prompt;
     await step.run("generate-text", async () => {
       return await generateText({
-        model: google("gemini-2.5-flash"),
+        model: openrouter("z-ai/glm-5.3-flash"),
         prompt: finalPrompt,
         experimental_telemetry: {
           isEnabled: true,

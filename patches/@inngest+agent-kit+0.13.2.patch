@@ -1,0 +1,330 @@
+diff --git a/node_modules/@inngest/agent-kit/dist/chunk-BSWKEFTT.js b/node_modules/@inngest/agent-kit/dist/chunk-BSWKEFTT.js
+index 50538d4..9ff2b3f 100644
+--- a/node_modules/@inngest/agent-kit/dist/chunk-BSWKEFTT.js
++++ b/node_modules/@inngest/agent-kit/dist/chunk-BSWKEFTT.js
+@@ -547,23 +547,312 @@ var responseParser2 = (input) => {
+     return acc;
+   }, []);
+ };
++var tryParseJsonSafe = (s) => {
++  try {
++    return { ok: true, value: JSON.parse(s) };
++  } catch (_e) {
++    return { ok: false };
++  }
++};
++// Some models return the whole JSON document wrapped in a quoted string (double encoded)
++var unwrapDoubleEncodedJson = (s) => {
++  const t = s.trim();
++  if (!t.startsWith('"') || !t.endsWith('"')) return null;
++  try {
++    const inner = JSON.parse(t);
++    if (typeof inner === "string") return inner.trim();
++  } catch (_e) {
++    /* ignore */
++  }
++  return null;
++};
++// Strip markdown code fences some models wrap tool arguments in
++var stripMarkdownFences = (s) => {
++  let out = s.trim();
++  const fenced = out.match(/^```[a-zA-Z]*\s*([\s\S]*?)\s*```$/);
++  if (fenced) out = fenced[1].trim();
++  // Drop stray opening/closing fence lines anywhere at the edges
++  out = out.replace(/^```[a-zA-Z]*\r?\n/, "").replace(/\r?\n```\s*$/, "");
++  return out.trim();
++};
++// Structural-quote normalisation: “ ” ‘ ’ lookalikes used as JSON delimiters
++var isJsonObjectLike = (v) =>
++  v !== null && v !== undefined && typeof v === "object";
++var escapeControlChar = (code) => "\\u" + code.toString(16).padStart(4, "0");
++var normaliseStructuralQuotes = (input) => {
++  let result = "";
++  let inString = false;
++  for (let i = 0; i < input.length; i++) {
++    const char = input[i];
++    if (inString) {
++      result += char;
++      if (char === "\\") {
++        result += input[i + 1] ?? "";
++        i++;
++      } else if (char === '"') {
++        inString = false;
++      }
++      continue;
++    }
++    if (char === "\u201C" || char === "\u201D") {
++      result += '"';
++      inString = true;
++      continue;
++    }
++    if (char === "\u2018" || char === "\u2019") {
++      result += "'";
++      continue;
++    }
++    if (char === '"') {
++      inString = true;
++    }
++    result += char;
++  }
++  return result;
++};
++// Convert single-quoted JSON keys/values to double quotes. Apostrophes inside a
++// single-quoted value are kept literal unless they clearly terminate the value.
++var singleToDoubleQuotes = (input) => {
++  let out = "";
++  let mode = 0; // 0 = code, 1 = double-quoted, 2 = single-quoted
++  for (let i = 0; i < input.length; i++) {
++    const char = input[i];
++    if (mode === 1) {
++      out += char;
++      if (char === "\\") {
++        out += input[i + 1] ?? "";
++        i++;
++      } else if (char === '"') {
++        mode = 0;
++      }
++      continue;
++    }
++    if (mode === 2) {
++      if (char === "\\") {
++        out += "\\" + (input[i + 1] ?? "");
++        i++;
++        continue;
++      }
++      if (char === "'") {
++        // Close unless an apostrophe continues mid-word (e.g. "it's")
++        let j = i + 1;
++        while (j < input.length && /\s/.test(input[j])) j++;
++        const next = input[j];
++        if (next === undefined || /[,;:}\]\n\r]/.test(next)) {
++          out += '"';
++          mode = 0;
++          continue;
++        }
++        out += "'";
++        continue;
++      }
++      if (char === '"') {
++        out += '\\"';
++        continue;
++      }
++      out += char;
++      continue;
++    }
++    if (char === '"') {
++      mode = 1;
++      out += char;
++      continue;
++    }
++    if (char === "'" && /[,{[:\s\n\r]/.test(out.slice(-1))) {
++      mode = 2;
++      out += '"';
++      continue;
++    }
++    out += char;
++  }
++  return out;
++};
++// Heuristic repair for models emitting unescaped double quotes inside string
++// values (very common when writing file contents): a quote terminates the
++// string only when the following non-whitespace character is valid JSON
++// structure (`:`, `,`, `}`, `]`) - otherwise it is escaped as inner content.
++var escapeInnerContentQuotes = (input) => {
++  let out = "";
++  let inString = false;
++  for (let i = 0; i < input.length; i++) {
++    const char = input[i];
++    if (!inString) {
++      out += char;
++      if (char === '"') inString = true;
++      continue;
++    }
++    if (char === "\\") {
++      out += char + (input[i + 1] ?? "");
++      i++;
++      continue;
++    }
++    if (char === '"') {
++      let j = i + 1;
++      while (j < input.length && /\s/.test(input[j])) j++;
++      const next = input[j];
++      if (next === undefined || next === ":" || next === "," || next === "}" || next === "]") {
++        inString = false;
++        out += char;
++      } else {
++        out += '\\"';
++      }
++      continue;
++    }
++    const code = char.charCodeAt(0);
++    if (code < 32 || code === 127) {
++      out += escapeControlChar(code);
++      continue;
++    }
++    out += char;
++  }
++  return out;
++};
++// Single-pass string-aware sanitizer: escapes raw control characters inside
++// double-quoted strings and removes trailing commas OUTSIDE strings only,
++// so file contents passed as values are never mangled.
++var sanitizeJsonStructure = (input) => {
++  let inString = false;
++  let out = "";
++  for (let i = 0; i < input.length; i++) {
++    const char = input[i];
++    if (!inString) {
++      if (char === '"') {
++        inString = true;
++        out += char;
++        continue;
++      }
++      // Look ahead past whitespace for a trailing comma (e.g. `,}` or `, ]`)
++      if (char === ",") {
++        let j = i + 1;
++        while (j < input.length && /\s/.test(input[j])) j++;
++        if (j < input.length && (input[j] === "}" || input[j] === "]")) {
++          // trailing comma: drop it
++          continue;
++        }
++        out += char;
++        continue;
++      }
++      // Normalise common smart/fullwidth quotes used structurally
++      if (char === "\u201C" || char === "\u201D") {
++        out += '"';
++        continue;
++      }
++      if (char === "\u2018" || char === "\u2019") {
++        out += "'";
++        continue;
++      }
++      out += char;
++      continue;
++    }
++    if (char === "\\") {
++      out += char + (input[i + 1] ?? "");
++      i++;
++      continue;
++    }
++    if (char === '"') {
++      inString = false;
++      out += char;
++      continue;
++    }
++    const code = char.charCodeAt(0);
++    if (code < 32 || code === 127) {
++      out += "\\u" + code.toString(16).padStart(4, "0");
++      continue;
++    }
++    out += char;
++  }
++  return out;
++};
++// Convert backtick-wrapped values (`like this`) into proper JSON strings,
++// preserving embedded newlines/quotes via JSON.stringify escaping.
++var inlineBacktickValues = (input) =>
++  input.replace(/`([^`]*)`/g, (_, content) => JSON.stringify(content));
+ var safeParseOpenAIJson = (str) => {
+-  const trimmed = str.replace(/^["']|["']$/g, "");
++  const raw = String(str ?? "").replace(/^\uFEFF/, "").trim();
++  if (raw === "") return {};
++  let parsedPrimitive;
++  const notePrimitive = (value) => {
++    if (parsedPrimitive === undefined && !isJsonObjectLike(value)) {
++      parsedPrimitive = value;
++    }
++  };
++  // 1) Direct parses (double encoding / fence variants included)
++  for (const attempt of [
++    raw,
++    unwrapDoubleEncodedJson(raw),
++    stripMarkdownFences(raw),
++    stripMarkdownFences(unwrapDoubleEncodedJson(raw) ?? ""),
++  ]) {
++    if (attempt == null || attempt === "") continue;
++    const direct = tryParseJsonSafe(attempt);
++    if (direct.ok) {
++      if (isJsonObjectLike(direct.value)) return direct.value;
++      notePrimitive(direct.value);
++      // The whole document was itself a JSON string: unwrap and retry
++      if (typeof direct.value === "string") {
++        const inner = tryParseJsonSafe(direct.value.trim());
++        if (inner.ok && isJsonObjectLike(inner.value)) return inner.value;
++        notePrimitive(inner.value);
++      }
++    }
++  }
++  // 2) Upstream legacy fix: backtick-wrapped values
+   try {
+-    return JSON.parse(trimmed);
+-  } catch (e) {
+-    try {
+-      const withQuotes = trimmed.replace(
+-        /`([\s\S]*?)`/g,
+-        (_, content) => JSON.stringify(content)
+-      );
+-      return JSON.parse(withQuotes);
+-    } catch (e2) {
+-      throw new Error(
+-        `Failed to parse JSON with backticks: ${stringifyError(e2)}`
+-      );
++    const withQuotes = raw.replace(
++      /`([\s\S]*?)`/g,
++      (_, content) => JSON.stringify(content)
++    );
++    const legacy = JSON.parse(withQuotes);
++    if (isJsonObjectLike(legacy)) return legacy;
++    notePrimitive(legacy);
++  } catch (_e) {
++    /* fallthrough */
++  }
++  // 3) Escalating repair pipelines, each O(n) over the arguments string:
++  //    control chars -> structural smart quotes -> single quotes ->
++  //    unescaped quotes inside content values.
++  const bases = [
++    stripMarkdownFences(raw),
++    raw,
++    stripMarkdownFences(unwrapDoubleEncodedJson(raw) ?? ""),
++  ].filter((a) => a != null && a !== "");
++  const pipelines = [
++    (s) => sanitizeJsonStructure(s),
++    (s) => sanitizeJsonStructure(normaliseStructuralQuotes(s)),
++    (s) => sanitizeJsonStructure(singleToDoubleQuotes(s)),
++    (s) => sanitizeJsonStructure(escapeInnerContentQuotes(s)),
++    (s) =>
++      sanitizeJsonStructure(singleToDoubleQuotes(normaliseStructuralQuotes(s))),
++    (s) =>
++      sanitizeJsonStructure(
++        escapeInnerContentQuotes(normaliseStructuralQuotes(s))
++      ),
++    (s) => sanitizeJsonStructure(inlineBacktickValues(s)),
++    (s) =>
++      sanitizeJsonStructure(
++        singleToDoubleQuotes(inlineBacktickValues(normaliseStructuralQuotes(s)))
++      ),
++    (s) =>
++      sanitizeJsonStructure(
++        singleToDoubleQuotes(
++          escapeInnerContentQuotes(normaliseStructuralQuotes(s))
++        )
++      ),
++  ];
++  for (const base of bases) {
++    for (const pipeline of pipelines) {
++      const repaired = tryParseJsonSafe(pipeline(base));
++      if (repaired.ok && isJsonObjectLike(repaired.value)) return repaired.value;
+     }
+   }
++  // Never fail the whole agent run over malformed tool arguments: degrading
++  // lets downstream zod validation reject the call and feeds an actionable
++  // error back to the model, which self-corrects on its next iteration.
++  console.warn(
++    "[agent-kit] Failed to parse tool-call arguments after all repairs; degrading. Raw length:",
++    raw.length
++  );
++  return parsedPrimitive !== undefined ? parsedPrimitive : {};
+ };
+ var openAiStopReasonToStateStopReason = {
+   tool_calls: "tool",

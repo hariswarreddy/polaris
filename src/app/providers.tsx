@@ -1,6 +1,6 @@
 "use client";
 import { AuthLoadingView } from "@/components/features/auth/components/auth-loading-view";
-import { UnauthenticatedView } from "@/components/features/auth/components/unauthorized";
+import { HomePage } from "@/components/features/home/components/home-page";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ClerkProvider, useAuth } from "@clerk/nextjs";
@@ -26,7 +26,7 @@ const Providers = ({ children }: { children: ReactNode }) => {
           <TooltipProvider>
             <Authenticated>{children}</Authenticated>
             <Unauthenticated>
-              <UnauthenticatedView />
+              <HomePage />
             </Unauthenticated>
             <AuthLoading>
               <AuthLoadingView />
