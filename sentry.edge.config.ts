@@ -12,10 +12,10 @@ Sentry.init({
   tracesSampleRate: 1,
 
   // Enable logs to be sent to Sentry
-  enableLogs: true,
+  // enableLogs: true,
   
   // Enable sending user PII (Personally Identifiable Information)
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
-  sendDefaultPii: true,
+  // sendDefaultPii: true,
   integrations:[Sentry.vercelAIIntegration()]
 });
