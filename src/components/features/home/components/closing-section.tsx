@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import { Show, SignInButton } from "@clerk/nextjs";
 import { Poppins } from "next/font/google";
-import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import Link from "next/link";
 import { FaGithub } from "react-icons/fa";
 
 import { Button } from "@/components/ui/button";
@@ -32,18 +32,18 @@ export const ClosingSection = () => {
               Spin up your first Polaris workspace — free, in seconds.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <SignedIn>
+              <Show when={"signed-in"}>
                 <Button size="lg" className="h-11 px-7" asChild>
                   <Link href="/projects">Open workspace</Link>
                 </Button>
-              </SignedIn>
-              <SignedOut>
+              </Show>
+              <Show when={"signed-out"}>
                 <SignInButton mode="modal">
                   <Button size="lg" className="h-11 px-7">
                     Get started free
                   </Button>
                 </SignInButton>
-              </SignedOut>
+              </Show>
             </div>
           </div>
         </div>

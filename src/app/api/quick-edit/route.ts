@@ -104,7 +104,7 @@ export async function POST(request: Request) {
       .replace("{documentation}", documentationContext);
 
     const { text } = await generateText({
-      model: openrouter("z-ai/glm-5.3-flash"),
+      model: openrouter("openrouter/free"),
       prompt,
     });
 

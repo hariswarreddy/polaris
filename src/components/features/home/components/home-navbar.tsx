@@ -5,8 +5,7 @@ import Link from "next/link";
 import { Poppins } from "next/font/google";
 import { MenuIcon } from "lucide-react";
 import {
-  SignedIn,
-  SignedOut,
+  Show,
   SignInButton,
   UserButton,
 } from "@clerk/nextjs";
@@ -57,13 +56,13 @@ const NavActions = ({ className }: { className?: string }) => (
       </a>
     </Button>
     <span className="mx-1 hidden h-5 w-px bg-border lg:block" />
-    <SignedIn>
+    <Show when={"signed-in"}>
       <Button size="sm" asChild>
         <Link href="/projects">Open Projects</Link>
       </Button>
       <UserButton />
-    </SignedIn>
-    <SignedOut>
+    </Show>
+    <Show when={"signed-out"}>
       <SignInButton mode="modal">
         <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
           Sign in
@@ -72,13 +71,13 @@ const NavActions = ({ className }: { className?: string }) => (
       <SignInButton mode="modal">
         <Button size="sm">Get started</Button>
       </SignInButton>
-    </SignedOut>
+    </Show>
   </div>
 );
 
 export const HomeNavbar = () => {
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-background/70 backdrop-blur-xl supports-[backdrop-filter]:bg-background/45">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-background/70 backdrop-blur-xl supports-backdrop-filter:bg-background/45">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 md:px-6">
         <Logo />
         <nav className="hidden items-center gap-1 md:flex">
@@ -128,14 +127,14 @@ export const HomeNavbar = () => {
                 ))}
               </div>
               <div className="flex flex-col gap-2 border-t border-white/5 p-4 pt-4">
-                <SignedIn>
+                <Show when={"signed-in"}>
                   <SheetClose asChild>
                     <Button asChild>
                       <Link href="/projects">Open workspace</Link>
                     </Button>
                   </SheetClose>
-                </SignedIn>
-                <SignedOut>
+                </Show>
+                <Show when={"signed-in"}>
                   <SignInButton mode="modal">
                     <Button variant="outline" className="w-full">
                       Sign in
@@ -144,7 +143,7 @@ export const HomeNavbar = () => {
                   <SignInButton mode="modal">
                     <Button className="w-full">Get started</Button>
                   </SignInButton>
-                </SignedOut>
+                </Show>
               </div>
             </SheetContent>
           </Sheet>

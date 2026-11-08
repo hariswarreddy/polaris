@@ -90,7 +90,7 @@ export async function POST(request: Request) {
       .replace("{lineNumber}", lineNumber.toString());
 
     const { text } = await generateText({
-      model: openrouter("z-ai/glm-5.3-flash"),
+      model: openrouter("openrouter/free"),
       prompt,
     });
     let suggestion = text.trim();

@@ -113,7 +113,7 @@ export const processMessage = inngest.createFunction(
         name: "title-generator",
         system: TITLE_GENERATOR_SYSTEM_PROMPT,
         model: openai({
-          model: "z-ai/glm-5.3-flash",
+          model: "openrouter/free",
           apiKey: process.env.OPENROUTER_API_KEY,
           baseUrl: "https://openrouter.ai/api/v1",
         }),
@@ -149,7 +149,7 @@ export const processMessage = inngest.createFunction(
       description: "An expert AI coding assistant",
       system: systemPrompt,
       model: openai({
-        model: "z-ai/glm-5.3-flash", // ← changed to Ox Alpha
+        model: "openrouter/free", // ← changed to Ox Alpha
         apiKey: process.env.OPENROUTER_API_KEY,
         baseUrl: "https://openrouter.ai/api/v1", // preferred spelling is baseURL
       }),

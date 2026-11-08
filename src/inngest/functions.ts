@@ -35,7 +35,7 @@ export const demoGenerate = inngest.createFunction(
       : prompt;
     await step.run("generate-text", async () => {
       return await generateText({
-        model: openrouter("z-ai/glm-5.3-flash"),
+        model: openrouter("openrouter/free"),
         prompt: finalPrompt,
         experimental_telemetry: {
           isEnabled: true,
