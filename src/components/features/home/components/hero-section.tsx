@@ -1,13 +1,12 @@
 "use client";
 
-import { Poppins } from "next/font/google";
+import { Show, SignInButton } from "@clerk/nextjs";
 import { GlobeIcon, ShieldCheckIcon, ZapIcon } from "lucide-react";
-import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { Poppins } from "next/font/google";
 import Link from "next/link";
-import { FaGithub } from "react-icons/fa";
 
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 import { MockWorkspace } from "./mock-workspace";
 
@@ -28,11 +27,11 @@ export const HeroSection = () => {
       {/* Backdrop */}
       <div
         aria-hidden
-        className="absolute left-1/2 top-[-260px] -z-10 h-[560px] w-[900px] max-w-none -translate-x-1/2 rounded-full bg-white/[0.05] blur-3xl"
+        className="absolute left-1/2 -top-65 -z-10 h-140 w-225 max-w-none -translate-x-1/2 rounded-full bg-white/5 blur-3xl"
       />
       <div
         aria-hidden
-        className="absolute inset-0 -z-20 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:56px_56px] [mask-image:radial-gradient(ellipse_at_center,black_25%,transparent_72%)]"
+        className="absolute inset-0 -z-20 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-size-[56px_56px] mask-[radial-gradient(ellipse_at_center,black_25%,transparent_72%)]"
       />
 
       <div className="mx-auto flex w-full max-w-6xl flex-col items-center px-4 text-center md:px-6">
@@ -58,22 +57,22 @@ export const HeroSection = () => {
         </p>
 
         <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row">
-          <SignedIn>
+          <Show when={"signed-in"}>
             <Button size="lg" className="h-11 px-7 text-base" asChild>
               <Link href="/projects">
                 Open workspace
                 <ArrowGlyph />
               </Link>
             </Button>
-          </SignedIn>
-          <SignedOut>
+          </Show>
+          <Show when={"signed-out"}>
             <SignInButton mode="modal">
               <Button size="lg" className="h-11 px-7 text-base">
                 Start building
                 <ArrowGlyph />
               </Button>
             </SignInButton>
-          </SignedOut>
+          </Show>
         </div>
 
         <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
