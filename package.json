@@ -101,6 +101,7 @@
   "overrides": {
     "express@5.2.1": {
       "body-parser": "^2.4.0"
-    }
+    },
+    "linkify-it": "5.0.1"
   }
 }
